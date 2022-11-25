@@ -1,0 +1,215 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DataContent {
+  id        String    @id @default(uuid())
+  source    String?
+  title     String?
+  link      String?
+  date      DateTime?
+  url       String?
+  content   String?
+  category  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model GoogleNews {
+  id        String   @id @default(uuid())
+  title     String?  @unique
+  source    String?
+  des       String?  @db.LongText
+  link      String?  @db.LongText
+  img       String?  @db.LongText
+  waktu     String?
+  Keyword   Keyword? @relation(fields: [keywordId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  keywordId String?
+  // @@fulltext([title, des])
+
+  @@fulltext([title])
+}
+
+model YoutubeContent {
+  id        String   @id @default(uuid())
+  title     String?  @unique
+  source    String?
+  views     String?
+  date      String?
+  link      String?  @db.LongText
+  img       String?  @db.LongText
+  Keyword   Keyword? @relation(fields: [keywordId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  keywordId String?
+
+  @@fulltext([title])
+}
+
+model FacebookLike {
+  // gunakan konten url yang di splice
+  id          String
+  name        String
+  contentUrl  String?  @db.Text
+  profileUrl  String?  @db.Text
+  kotaSaatIni String?
+  kotaAsal    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Keyword     Keyword? @relation(fields: [keywordId], references: [id])
+  keywordId   String?
+
+  @@id([id, name])
+}
+
+// latitude: -7.45597405,
+// longitude: 112.66088771295344,
+// formattedAddress: 'Sidoarjo, Jawa Timur, Indonesia',
+// country: 'Indonesia',
+// city: undefined,
+// state: 'Jawa Timur',
+// zipcode: undefined,
+// streetName: undefined,
+// streetNumber: undefined,
+// countryCode: 'ID',
+// neighbourhood: '',
+// provider: 'openstreetmap'
+
+model Lokasi {
+  latitude         String
+  longitude        String
+  formattedAddress String?
+  country          String?
+  city             String?
+  state            String?
+  zipcode          String?
+  streetName       String?
+  streetNumber     String?
+  countryCode      String?
+  neighbourhood    String?
+  provider         String?
+
+  @@id([latitude, longitude])
+}
+
+// userName: "",
+// userUrl: "",
+// content: "",
+// contentId: "",
+// location: ""
+
+model TwitterLates {
+  userName  String
+  userUrl   String
+  contentId String
+  content   String?  @db.Text
+  location  String?
+  Keyword   Keyword? @relation(fields: [keywordId], references: [id])
+  keywordId String?
+  // @@fulltext([content])
+
+  @@id([userName, contentId])
+}
+
+model Keyword {
+  id             String           @id @default(uuid())
+  name           String?          @unique
+  profileId      String?
+  idx            Int?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  CollectCount   CollectCount[]
+  YoutubeContent YoutubeContent[]
+  GoogleNews     GoogleNews[]
+  FacebookLike   FacebookLike[]
+  TwitterLates   TwitterLates[]
+}
+
+model CollectCount {
+  id        String   @id @default(uuid())
+  Keyword   Keyword? @relation(fields: [keywordId], references: [id])
+  cnt       Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  keywordId String?
+}
+
+model TrainAi {
+  id        String   @id @default(uuid())
+  name      String?
+  result    Json?
+  content   Json?
+  suggest   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  iteration Int?
+}
+
+model Project {
+  id            String        @id @default(uuid())
+  idx           Int?
+  name          String?
+  des           String?
+  createBy      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  ProjectType   ProjectType[]
+  ProjectUser   ProjectUser?  @relation(fields: [projectUserId], references: [id])
+  projectUserId String?
+}
+
+model ProjectUser {
+  id        String    @id @default(uuid())
+  idx       Int?
+  name      String?
+  email     String?
+  password  String?
+  role      Int?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Project   Project[]
+}
+
+model ProjectUserRole {
+  id    String  @id @default(uuid())
+  title String?
+  des   String?
+}
+
+model ProjectType {
+  id          String        @id @default(uuid())
+  title       String?
+  des         String?
+  idx         Int?
+  Project     Project?      @relation(fields: [projectId], references: [id])
+  projectId   String?
+  ProjectItem ProjectItem[]
+}
+
+model ProjectItem {
+  id            String       @id @default(uuid())
+  idx           Int?
+  title         String?
+  des           String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  ProjectType   ProjectType? @relation(fields: [projectTypeId], references: [id])
+  projectTypeId String?
+}
