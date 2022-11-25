@@ -17,7 +17,7 @@ const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
     })
 
     // me sum semua score
-    let hasil = data.map(e => {
+    let hasil = data.map((e: any) => {
         return {
             id: e.id,
             idx: e.idx,
