@@ -1,6 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../util/prisma";
 import _ from 'lodash'
+import { Keyword } from "@prisma/client";
+
+interface DataKeyword {
+    _count: {
+        YoutubeContent: number;
+        FacebookLike: number;
+        GoogleNews: number;
+        TwitterLates: number;
+    }
+}
 
 const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
     let data = await prisma.keyword.findMany({
@@ -17,7 +27,7 @@ const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
     })
 
     // me sum semua score
-    let hasil = data.map((e: any) => {
+    let hasil = data.map((e: Keyword & DataKeyword) => {
         return {
             id: e.id,
             idx: e.idx,
