@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import {
     AppShell,
     Navbar,
@@ -11,8 +11,11 @@ import {
     useMantineTheme,
 } from '@mantine/core';
 import LayoutNavbar from './layout_navbar';
+import { AppProps } from 'next/app';
 
-export default function LayoutDefault() {
+
+
+export default function LayoutDefault({ children }: PropsWithChildren) {
     const theme = useMantineTheme();
     const [opened, setOpened] = useState(false);
     return (
@@ -56,7 +59,7 @@ export default function LayoutDefault() {
                 </Header>
             }
         >
-            <Text>Resize app to see responsive navbar in action</Text>
+            {children}
         </AppShell>
     );
 }

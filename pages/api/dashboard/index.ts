@@ -2,15 +2,16 @@ import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../util/prisma";
 import _ from 'lodash'
 import { Keyword } from "@prisma/client";
+import { DataKeyword, ResultDashboard } from "../../../models/model";
 
-interface DataKeyword {
-    _count: {
-        YoutubeContent: number;
-        FacebookLike: number;
-        GoogleNews: number;
-        TwitterLates: number;
-    }
-}
+// interface DataKeyword {
+//     _count: {
+//         YoutubeContent: number;
+//         FacebookLike: number;
+//         GoogleNews: number;
+//         TwitterLates: number;
+//     }
+// }
 
 const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
     let data = await prisma.keyword.findMany({
@@ -23,6 +24,9 @@ const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
                     TwitterLates: true
                 }
             }
+        },
+        orderBy: {
+            idx: "asc"
         }
     })
 
@@ -38,7 +42,7 @@ const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
 
     let total = _.sumBy(hasil, (e) => e.score);
 
-    let result2 = hasil.map(e => ({
+    let result2: ResultDashboard[] = hasil.map(e => ({
         id: e.id,
         idx: e.idx,
         name: e.name,
