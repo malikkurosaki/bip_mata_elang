@@ -1,19 +1,23 @@
-import { Avatar, Card, Flex, Group, Image, SimpleGrid, Space, Stack, Text, Title } from "@mantine/core"
+import { Avatar, Box, Card, Center, Divider, Flex, Group, Image, Paper, SimpleGrid, Space, Stack, Text, Title } from "@mantine/core"
 import LayoutDefault from "../../../components/layout_default"
 import Clock from 'react-live-clock';
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ResultDashboard } from "../../../models/model";
 import { IconArrowBarDown } from "@tabler/icons";
 import useStore from "../../../util/store";
+import { useDebouncedState, useShallowEffect } from '@mantine/hooks';
+import ReactECharts from 'echarts-for-react';
+import { AppProps } from "next/dist/shared/lib/router/router";
 
 const Dashboard = () => {
     const [waktu, setWaktu] = useState<JSX.Element>()
     const [tanggal, setTanggal] = useState<String>()
     const [totalCount, setTotalCount] = useState<number>()
-    const [resultDashboard, setResultDashboard] = useState<ResultDashboard[]>()
-    const listResultStore = useStore<ResultDashboard[]>("listResult");
+    const [resultDashboard, setResultDashboard] = useState<ResultDashboard[]>([])
+    const [oldData, setOldData] = useState<ResultDashboard[]>([]);
+    const [dataPrabowo, setDataPrabowo] = useState<ResultDashboard>();
 
-    useEffect(() => {
+    useShallowEffect(() => {
         const clock = <Clock
             format={'h:mm:ssa'}
             ticking={true} />
@@ -21,6 +25,8 @@ const Dashboard = () => {
         setWaktu(clock)
 
         setTanggal((new Date()).toLocaleDateString())
+
+        setOldData([...useStore<ResultDashboard[]>("listResult").get() ?? []])
 
         fetch('/api/dashboard/data-count').then(async (res) => {
             if (res) {
@@ -31,8 +37,11 @@ const Dashboard = () => {
 
         fetch('/api/dashboard').then(async (res) => {
             if (res) {
-                listResultStore.set(resultDashboard!)
-                setResultDashboard((await res.json()))
+                useStore("listResult").set([...resultDashboard ?? []])
+                let data: ResultDashboard[] = await res.json()
+                setResultDashboard(data);
+                setDataPrabowo(data.find(itm => itm.idx === 1))
+
             }
         })
 
@@ -62,25 +71,182 @@ const Dashboard = () => {
                     </Stack>
                 </Card>
             </Group>
-            <Space h={"lg"} />
-            {JSON.stringify(listResultStore)}
+            <Space h={60} />
+            {/* <Text>disini loh</Text>
+            {JSON.stringify(oldData)} */}
+            {dataPrabowo && <Stack>
+                <Group position={"center"} >
+                    <Box p={"lg"}>
+                        <Image width={180} radius={300} src={"/calon/" + dataPrabowo.name + ".png"} withPlaceholder alt="gambar prabowo" />
+                    </Box>
+                    <PrabowoChart data={dataPrabowo} />
+                </Group>
+                <Center>
+                    <Text>
+                        {dataPrabowo.name}
+                    </Text>
+                </Center>
+            </Stack>}
+            <Space h={60} />
+
             <Group position={"left"}>
-                {resultDashboard?.map((itm) => itm.idx != 1 && <Stack key={itm.id} sx={{ width: 150 }}>
+                {resultDashboard?.map((itm) => itm.idx != 1 && <Stack key={itm.id} sx={{ width: 200 }}>
                     <Flex p={"md"}>
-                        <Image radius={200} src={"/calon/" + itm.name + ".png"} withPlaceholder alt="gambar calon" />
-                        <Card>
+                        <Box p={"md"}>
+                            <Image width={80} radius={200} src={"/calon/" + itm.name + ".png"} withPlaceholder alt="gambar calon" />
+                        </Box>
+                        <Box p={"md"}>
                             <Title >{itm.score}</Title>
                             <Stack>
                                 <IconArrowBarDown />
                             </Stack>
-                        </Card>
+                        </Box>
                     </Flex>
-                    <Text color={"gray"}>{itm.name}</Text>
-
+                    <Divider />
+                    <Center>
+                        <Text color={"gray"}>{itm.name}</Text>
+                    </Center>
+                    <Divider />
                 </Stack>)}
             </Group>
-
+            <Space h={60} />
+            <StackLineChart />
         </LayoutDefault>
+    </>)
+}
+
+
+const StackLineChart = () => {
+    const [option, setOption] = useDebouncedState({}, 200);
+
+    useShallowEffect(() => {
+        fetch('/api/dashboard/stack-chart').then(async res => {
+            if (res.status === 200) {
+                const datanya = await res.json()
+
+                const options = {
+                    // title: {
+                    //     text: 'Stacked Line'
+                    // },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: [...datanya.map((val: any) => val.name)]
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [...datanya.map((val: any) => ({
+                        name: val.name,
+                        type: 'line',
+                        stack: 'Total',
+                        data: [...val.data.map((vv: any) => vv.value)]
+                    }))]
+                    // [
+                    //     {
+                    //         name: 'Email',
+                    //         type: 'line',
+                    //         stack: 'Total',
+                    //         data: [120, 132, 101, 134, 90, 230, 210]
+                    //     },
+                    //     {
+                    //         name: 'Union Ads',
+                    //         type: 'line',
+                    //         stack: 'Total',
+                    //         data: [220, 182, 191, 234, 290, 330, 310]
+                    //     },
+                    //     {
+                    //         name: 'Video Ads',
+                    //         type: 'line',
+                    //         stack: 'Total',
+                    //         data: [150, 232, 201, 154, 190, 330, 410]
+                    //     },
+                    //     {
+                    //         name: 'Direct',
+                    //         type: 'line',
+                    //         stack: 'Total',
+                    //         data: [320, 332, 301, 334, 390, 330, 320]
+                    //     },
+                    //     {
+                    //         name: 'Search Engine',
+                    //         type: 'line',
+                    //         stack: 'Total',
+                    //         data: [820, 932, 901, 934, 1290, 1330, 1320]
+                    //     }
+                    // ]
+                };
+
+                setOption(options)
+            }
+        })
+
+
+
+
+    }, [])
+    return (<>
+        <ReactECharts option={option} />
+    </>)
+}
+
+
+interface DATA_PRABOWO {
+    data: ResultDashboard
+}
+
+const PrabowoChart = ({ data }: DATA_PRABOWO) => {
+    const [option, setOption] = useState<{}>({});
+
+    useShallowEffect(() => {
+        let options = {
+            tooltip: {
+                formatter: '{a} <br/>{b} : {c}%'
+            },
+            series: [
+                {
+                    name: 'Pressure',
+                    type: 'gauge',
+                    progress: {
+                        show: true
+                    },
+                    detail: {
+                        valueAnimation: true,
+                        formatter: '{value}'
+                    },
+                    data: [
+                        {
+                            value: data.score,
+                            name: 'SCORE'
+                        }
+                    ]
+                }
+            ]
+        };
+
+        setOption(options)
+    }, [])
+
+    return (<>
+        <Box>
+            <ReactECharts option={option} style={{ height: 250, width: 250 }} />
+        </Box>
     </>)
 }
 

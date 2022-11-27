@@ -12,25 +12,20 @@ type nama = "listResult" | "apa"
 //     }
 // })
 
-function useStore<S = undefined>(name: nama) {
-    function get() {
-        let d: S = store.get(name)
 
-        console.log("ini ada dimana")
-        return d
-    }
-
-    function set(value: S) {
-        store.set(name, value)
-    }
-
-    return {
-        get,
-        set
-    }
+function useStore<S>(name: nama) {
+    return ({
+        get(): S {
+            return store.get(name)
+        },
+        set(value: S) {
+            store.set(name, value)
+        }
+    })
 }
 
 
 // function useState2<S = undefined>(): [S | undefined, Dispatch<SetStateAction<S | undefined>>];
+// function useState<S>(initialState: S | (() => S)): [S, Dispatch<SetStateAction<S>>];
 
 export default useStore

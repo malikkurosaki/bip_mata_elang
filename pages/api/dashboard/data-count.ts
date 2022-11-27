@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import prisma from "../../../util/prisma";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 const dataCount = async (req: NextApiRequest, res: NextApiResponse) => {
     const fb = await prisma.facebookLike.count()

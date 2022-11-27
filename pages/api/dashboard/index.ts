@@ -1,17 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import prisma from "../../../util/prisma";
 import _ from 'lodash'
 import { Keyword } from "@prisma/client";
 import { DataKeyword, ResultDashboard } from "../../../models/model";
-
-// interface DataKeyword {
-//     _count: {
-//         YoutubeContent: number;
-//         FacebookLike: number;
-//         GoogleNews: number;
-//         TwitterLates: number;
-//     }
-// }
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient()
 
 const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
     let data = await prisma.keyword.findMany({
@@ -31,7 +23,7 @@ const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
     })
 
     // me sum semua score
-    let hasil = data.map((e: Keyword & DataKeyword) => {
+    let hasil = data?.map((e: Keyword & DataKeyword) => {
         return {
             id: e.id,
             idx: e.idx,
@@ -42,7 +34,7 @@ const apiDashboard = async (req: NextApiRequest, res: NextApiResponse) => {
 
     let total = _.sumBy(hasil, (e) => e.score);
 
-    let result2: ResultDashboard[] = hasil.map(e => ({
+    let result2: ResultDashboard[] | undefined = hasil?.map(e => ({
         id: e.id,
         idx: e.idx,
         name: e.name,
