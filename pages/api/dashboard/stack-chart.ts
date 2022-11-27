@@ -21,8 +21,8 @@ const apiStackLine = async (req: NextApiRequest, res: NextApiResponse) => {
     for (let itm of keyword) {
         itm.data = await prisma.$queryRaw`
         SELECT DAYNAME(createdAt) as name, COUNT(*) as value
-        from FacebookLike
-        WHERE FacebookLike.keywordId = ${itm.id}
+        from GoogleNews
+        WHERE GoogleNews.keywordId = ${itm.id}
         GROUP BY DAYOFWEEK(createdAt)
         `
     }
