@@ -3,8 +3,8 @@ import LayoutDefault from "../../../components/layout_default"
 import Clock from 'react-live-clock';
 import { useEffect, useMemo, useState } from "react";
 import { ResultDashboard } from "../../../models/model";
-import { IconArrowBarDown } from "@tabler/icons";
-import useStore from "../../../util/store";
+import { IconArrowBarDown, IconArrowBarUp } from "@tabler/icons";
+// import useStore from "../../../util/store";
 import { useDebouncedState, useShallowEffect } from '@mantine/hooks';
 import ReactECharts from 'echarts-for-react';
 import { AppProps } from "next/dist/shared/lib/router/router";
@@ -26,7 +26,7 @@ const Dashboard = () => {
 
         setTanggal((new Date()).toLocaleDateString())
 
-        setOldData([...useStore<ResultDashboard[]>("listResult").get() ?? []])
+        // setOldData([...useStore<ResultDashboard[]>("listResult").get() ?? []])
 
         fetch('/api/dashboard/data-count').then(async (res) => {
             if (res) {
@@ -37,7 +37,8 @@ const Dashboard = () => {
 
         fetch('/api/dashboard').then(async (res) => {
             if (res) {
-                useStore("listResult").set([...resultDashboard ?? []])
+                // useStore("listResult").set([...resultDashboard ?? []])
+                setOldData([...resultDashboard])
                 let data: ResultDashboard[] = await res.json()
                 setResultDashboard(data);
                 setDataPrabowo(data.find(itm => itm.idx === 1))
@@ -95,12 +96,11 @@ const Dashboard = () => {
                         <Box p={"md"}>
                             <Image width={80} radius={200} src={"/calon/" + itm.name + ".png"} withPlaceholder alt="gambar calon" />
                         </Box>
-                        <Box p={"md"}>
+                        <Stack align={"center"} justify={"center"} p={"md"} >
+                            {oldData.find((dt) => dt.id === itm.id)?.score! < itm.score && <IconArrowBarUp />}
                             <Title >{itm.score}</Title>
-                            <Stack>
-                                <IconArrowBarDown />
-                            </Stack>
-                        </Box>
+                            {(oldData.find((dt) => dt.id === itm.id)?.score ?? 0) > itm.score && <IconArrowBarDown />}
+                        </Stack>
                     </Flex>
                     <Divider />
                     <Center>

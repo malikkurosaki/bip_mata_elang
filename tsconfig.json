@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "xcoba.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "util/store.js", "util/prisma.js", "xcoba.js"],
   "exclude": ["node_modules"]
 }
