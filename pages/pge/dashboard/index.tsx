@@ -1,4 +1,4 @@
-import { Avatar, Box, Card, Center, Divider, Flex, Group, Image, Paper, SimpleGrid, Space, Stack, Text, Title } from "@mantine/core"
+import { Avatar, Box, Card, Center, Divider, Flex, Group, Image, Paper, RingProgress, SimpleGrid, Space, Stack, Text, Title } from "@mantine/core"
 import LayoutDefault from "../../../components/layout_default"
 import Clock from 'react-live-clock';
 import { useEffect, useMemo, useState } from "react";
@@ -61,7 +61,7 @@ const Dashboard = () => {
                         </Title>
                     </Stack>
                 </Card>
-                <Card bg={"blue"}>
+                {/* <Card bg={"blue"}>
                     <Stack sx={{ width: 300, height: 100 }}>
                         <Text color={"white"}>
                             Total
@@ -70,7 +70,7 @@ const Dashboard = () => {
                             <Title color={"white"}>{totalCount}</Title>
                         </Group>
                     </Stack>
-                </Card>
+                </Card> */}
             </Group>
             <Space h={60} />
             {/* <Text>disini loh</Text>
@@ -80,7 +80,16 @@ const Dashboard = () => {
                     <Box p={"lg"}>
                         <Image width={180} radius={300} src={"/calon/" + dataPrabowo.name + ".png"} withPlaceholder alt="gambar prabowo" />
                     </Box>
-                    <PrabowoChart data={dataPrabowo} />
+                    {/* <PrabowoChart data={dataPrabowo} /> */}
+                    {/* <Title>{dataPrabowo.score}</Title> */}
+                    <RingProgress
+                        label={<Title>{dataPrabowo.score}</Title>}
+                        sections={[
+                            { value: dataPrabowo.score, color: 'orange' },
+                            // { value: 15, color: 'orange' },
+                            // { value: 15, color: 'grape' },
+                        ]}
+                    />
                 </Group>
                 <Center>
                     <Text>
@@ -103,9 +112,7 @@ const Dashboard = () => {
                         </Stack>
                     </Flex>
                     <Divider />
-                    <Center>
-                        <Text color={"gray"}>{itm.name}</Text>
-                    </Center>
+                    <Text color={"gray"}>{itm.name}</Text>
                     <Divider />
                 </Stack>)}
             </Group>

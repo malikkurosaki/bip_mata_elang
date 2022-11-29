@@ -13,9 +13,9 @@ const listNavLink = [
         "href": "/pge/dashboard"
     },
     {
-        "lable": "Interim Assessment",
+        "lable": "Area Distribution",
         "icon": Icon360View,
-        "href": "/pge/dashboard"
+        "href": "/pge/area-distribution"
     },
     {
         "lable": "Source Data",
